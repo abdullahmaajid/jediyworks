@@ -1,0 +1,180 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-crimson: #520100;
+  --color-oxblood: #7A0200;
+  --color-ruby-mid: #8C1F1E;
+  --color-bone: #F2EFE9;
+  --color-warm-gray: #D9D6D0;
+  --color-near-black: #0D0D0D;
+  --color-espresso: #2B2320;
+  --color-aged-gold: #C9A84C;
+  --color-gold-dim: #A08838;
+  --color-bone-dim: #C8C5BF;
+
+  /* Typography Scale */
+  --font-serif: var(--font-cormorant);
+  --font-sans: var(--font-manrope);
+  --font-script: var(--font-script);
+  --font-mono: "JetBrains Mono", monospace;
+}
+
+@layer base {
+  :root {
+    --crimson: #520100;
+    --oxblood: #7A0200;
+    --ruby-mid: #8C1F1E;
+    --bone: #F2EFE9;
+    --warm-gray: #D9D6D0;
+    --near-black: #0D0D0D;
+    --espresso: #2B2320;
+    --aged-gold: #C9A84C;
+    --gold-dim: #A08838;
+    --bone-dim: #C8C5BF;
+  }
+
+  * {
+    box-sizing: border-box;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--bone);
+    color: var(--near-black);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  .neo-swiss-grid {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 9997;
+    background-image: 
+      linear-gradient(to right, rgba(13, 13, 13, 0.05) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(13, 13, 13, 0.05) 1px, transparent 1px);
+    background-size: 100px 100px;
+    background-position: center center;
+  }
+  
+  /* Make all interactive elements use the custom cursor */
+  a, button, input, select, textarea {
+  }
+
+  /* Selection Color */
+  ::selection {
+    background-color: var(--crimson);
+    color: var(--bone);
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--warm-gray);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--bone-dim);
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-serif);
+    font-weight: 400;
+  }
+
+  .font-script {
+    font-family: var(--font-script);
+  }
+}
+
+@layer components {
+  /* Button Styles */
+  .btn-primary {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-[var(--crimson)] text-[var(--bone)] font-sans text-[15px] font-medium transition-all duration-180 ease-in-out hover:bg-[var(--oxblood)] disabled:opacity-35 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center px-6 py-3 bg-transparent border-[1.5px] border-[var(--crimson)] text-[var(--crimson)] font-sans text-[15px] font-medium transition-all duration-180 ease-in-out hover:bg-[var(--crimson)] hover:text-[var(--bone)] disabled:opacity-35 disabled:cursor-not-allowed;
+  }
+
+  /* Form Elements */
+  .input-field {
+    @apply w-full bg-transparent border border-[var(--warm-gray)] px-4 py-3 font-sans text-[16px] text-[var(--near-black)] transition-all duration-150 focus:outline-none focus:border-[var(--crimson)] focus:border-[1.5px] placeholder:text-[#9C9995];
+  }
+
+  .input-field-dark {
+    @apply w-full bg-transparent border border-[rgba(242,239,233,0.3)] px-4 py-3 font-sans text-[16px] text-[var(--bone)] transition-all duration-150 focus:outline-none focus:border-[var(--bone)] focus:border-[1.5px] placeholder:text-[rgba(242,239,233,0.45)];
+  }
+
+  /* Tag Pills */
+  .tag-technology {
+    @apply inline-flex items-center px-3 py-1 bg-[var(--crimson)] text-[var(--bone)] font-sans text-[11px] font-medium uppercase tracking-[0.08em] whitespace-nowrap;
+  }
+  
+  .tag-creative-production {
+    @apply inline-flex items-center px-3 py-1 bg-[var(--espresso)] text-[var(--bone)] font-sans text-[11px] font-medium uppercase tracking-[0.08em] whitespace-nowrap;
+  }
+
+  .tag-brand-identity {
+    @apply inline-flex items-center px-3 py-1 bg-[var(--ruby-mid)] text-[var(--bone)] font-sans text-[11px] font-medium uppercase tracking-[0.08em] whitespace-nowrap;
+  }
+
+  .tag-audio-post {
+    @apply inline-flex items-center px-3 py-1 bg-[var(--near-black)] text-[var(--bone)] font-sans text-[11px] font-medium uppercase tracking-[0.08em] whitespace-nowrap;
+  }
+
+  .tag-client-work {
+    @apply inline-flex items-center px-3 py-1 bg-transparent border border-[var(--warm-gray)] text-[#6B6762] font-sans text-[11px] font-medium uppercase tracking-[0.08em] whitespace-nowrap;
+  }
+
+  .tag-experimental {
+    @apply inline-flex items-center px-3 py-1 bg-transparent border border-[var(--aged-gold)] text-[var(--aged-gold)] font-sans text-[11px] font-medium uppercase tracking-[0.08em] whitespace-nowrap;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  /* Animations */
+  .fade-up-enter {
+    opacity: 0;
+    transform: translateY(40px);
+    animation: fadeUp 400ms ease-out forwards;
+  }
+
+  .stagger-1 { animation-delay: 80ms; }
+  .stagger-2 { animation-delay: 160ms; }
+  .stagger-3 { animation-delay: 240ms; }
+  .stagger-4 { animation-delay: 320ms; }
+  .stagger-5 { animation-delay: 400ms; }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(40px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .star-fill {
+    animation: starFill 120ms ease-in forwards;
+  }
+
+  @keyframes starFill {
+    from { color: var(--warm-gray); }
+    to { color: var(--aged-gold); }
+  }
+}

@@ -1,0 +1,129 @@
+// JEDIYWORKS Database Schema
+// PostgreSQL via Prisma ORM
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+// ─────────────────────────────────────────────
+// Projects — Case studies and portfolio pieces
+// ─────────────────────────────────────────────
+model Project {
+  id            String   @id @default(uuid())
+  title         String
+  slug          String   @unique
+  summary       String?  // 100–146 characters (enforced in app layer)
+  thumbnailUrl  String?  @map("thumbnail_url")
+  thumbnailAlt  String?  @map("thumbnail_alt")
+  category      String   // 'client_work' | 'experimental'
+  pillar        String   // 'technology' | 'creative_visual' | 'audio_post'
+  clientName    String?  @map("client_name")
+  year          Int?
+  duration      String?
+  liveLink      String?  @map("live_link")
+  scopeOfWork   String[] @default([]) @map("scope_of_work")
+  problem       String?  @db.Text
+  strategy      String?  @db.Text
+  execution     String?  @db.Text
+  impact        String?  @db.Text
+  techStack     String[] @map("tech_stack")
+  reviewRating  Int?     @map("review_rating")
+  reviewQuote   String?  @map("review_quote") @db.Text
+  reviewAuthor  String?  @map("review_author")
+  reviewTitle   String?  @map("review_title")
+  galleryImages Json     @default("[]") @map("gallery_images")
+  videoEmbeds   String[] @default([]) @map("video_embeds")
+  status        String   @default("draft") // 'draft' | 'published'
+  featured      Boolean  @default(false)
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  credits CreditLink[]
+
+  @@map("projects")
+}
+
+// ─────────────────────────────────────────────
+// Collaborators — The Circle members
+// ─────────────────────────────────────────────
+model Collaborator {
+  id             String   @id @default(uuid())
+  fullName       String   @map("full_name")
+  alias          String?
+  brandingName   String   @map("branding_name")
+  slug           String   @unique
+  defaultRole    String?  @map("default_role")
+  photoUrl       String?  @map("photo_url")
+  bannerUrl      String?  @map("banner_url")
+  logoUrl        String?  @map("logo_url")
+  bio            String?  // max 200 characters
+  positionLine   String?  @map("position_line") // max 80 characters
+  socialIg       String?  @map("social_ig")
+  socialLinkedin String?  @map("social_linkedin")
+  socialYoutube  String?  @map("social_youtube")
+  location       String?
+  personalWebsite String? @map("personal_website")
+  skills         String[]
+  status         String   @default("active") // 'active' | 'inactive'
+  profileVisible Boolean  @default(true) @map("profile_visible")
+  sortOrder      Int      @default(0) @map("sort_order")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  credits CreditLink[]
+  user    User?
+
+  @@map("collaborators")
+}
+
+// ─────────────────────────────────────────────
+// Credit Links — Many-to-many: Project ↔ Collaborator
+// ─────────────────────────────────────────────
+model CreditLink {
+  id             String       @id @default(uuid())
+  projectId      String       @map("project_id")
+  collaboratorId String       @map("collaborator_id")
+  roleInProject  String       @map("role_in_project")
+
+  project      Project      @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  collaborator Collaborator @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, collaboratorId])
+  @@map("credit_links")
+}
+
+// ─────────────────────────────────────────────
+// Inbox — Contact form submissions
+// ─────────────────────────────────────────────
+model Inbox {
+  id        String   @id @default(uuid())
+  email     String
+  category  String
+  message   String   // max 300 characters (enforced in app layer)
+  status    String   @default("new") // 'new' | 'read' | 'archived'
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("inbox")
+}
+
+// ─────────────────────────────────────────────
+// Users — Authentication for Admin & Collaborators
+// ─────────────────────────────────────────────
+model User {
+  id             String        @id @default(uuid())
+  username       String        @unique
+  password       String        // Hashed using bcrypt
+  role           String        @default("collaborator") // 'admin' | 'collaborator'
+  
+  // Optional link to a Collaborator profile (Admins might not have one)
+  collaboratorId String?       @unique @map("collaborator_id")
+  collaborator   Collaborator? @relation(fields: [collaboratorId], references: [id], onDelete: Cascade)
+  
+  createdAt      DateTime      @default(now()) @map("created_at")
+  
+  @@map("users")
+}
