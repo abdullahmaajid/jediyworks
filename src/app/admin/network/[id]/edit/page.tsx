@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { AdminForm, FormField, FormInput, FormTextarea } from "../../../../../components/admin/AdminForm";
 
-export default function EditCollaboratorPage({ params }: { params: { id: string } }) {
+export default function EditCollaboratorPage() {
   const router = useRouter();
+  const { id } = useParams();
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
@@ -18,11 +19,11 @@ export default function EditCollaboratorPage({ params }: { params: { id: string 
     status: "ACTIVE", profileVisible: true, sortOrder: "0",
   });
 
-  useEffect(() => { fetchCollaborator(); }, [params.id]);
+  useEffect(() => { fetchCollaborator(); }, [id]);
 
   const fetchCollaborator = async () => {
     try {
-      const res = await fetch(`/api/admin/collaborators/${params.id}`);
+      const res = await fetch(`/api/admin/collaborators/${id}`);
       if (!res.ok) throw new Error("Failed to fetch collaborator");
       const d = await res.json();
       setFormData({
@@ -49,7 +50,7 @@ export default function EditCollaboratorPage({ params }: { params: { id: string 
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`/api/admin/collaborators/${params.id}`, {
+      const res = await fetch(`/api/admin/collaborators/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
@@ -146,7 +147,7 @@ export default function EditCollaboratorPage({ params }: { params: { id: string 
 
         <div className="border-t border-[var(--warm-gray)] pt-8 mt-8 grid grid-cols-1 md:grid-cols-3 gap-8">
           <FormField label="Status">
-            <select name="status" value={formData.status} onChange={handleChange} className="w-full bg-[#F8F6F3] border border-[var(--warm-gray)] p-3 text-[var(--near-black)] focus:outline-none focus:border-[var(--crimson)]">
+            <select name="status" value={formData.status} onChange={handleChange} aria-label="Status" className="w-full bg-[#F8F6F3] border border-[var(--warm-gray)] p-3 text-[var(--near-black)] focus:outline-none focus:border-[var(--crimson)]">
               <option value="ACTIVE">Active</option>
               <option value="INACTIVE">Inactive</option>
             </select>

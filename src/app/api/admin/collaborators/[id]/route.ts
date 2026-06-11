@@ -7,50 +7,67 @@ const prisma = new PrismaClient();
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+
     const session = await getServerSession(authOptions);
+
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    if (session.user.role !== "admin" && session.user.collaboratorId !== params.id) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    if (
+      session.user.role !== "admin" &&
+      session.user.collaboratorId !== id
+    ) {
+      return NextResponse.json(
+        { error: "Forbidden" },
+        { status: 403 }
+      );
     }
 
     const collaborator = await prisma.collaborator.findUnique({
-      where: { id: params.id },
+      where: { id },
     });
-
-    if (!collaborator) {
-      return NextResponse.json({ error: "Not Found" }, { status: 404 });
-    }
 
     return NextResponse.json(collaborator);
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   try {
     const session = await getServerSession(authOptions);
+
     if (!session) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "admin" && session.user.collaboratorId !== params.id) {
+    if (
+      session.user.role !== "admin" &&
+      session.user.collaboratorId !== id
+    ) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const data = await request.json();
 
     const collaborator = await prisma.collaborator.update({
-      where: { id: params.id },
+      where: { id },
       data: {
         fullName: data.fullName,
         alias: data.alias,
@@ -82,33 +99,41 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
+  const { id } = await params;
+
   try {
     const session = await getServerSession(authOptions);
+
     if (!session || session.user.role !== "admin") {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
     }
 
-    // Admins only can delete collaborators
-    
-    // First remove credit links
+    // Hapus relasi credit terlebih dahulu
     await prisma.creditLink.deleteMany({
-      where: { collaboratorId: params.id }
+      where: { collaboratorId: id },
     });
 
-    // Remove user login link
+    // Lepaskan relasi user
     await prisma.user.updateMany({
-      where: { collaboratorId: params.id },
-      data: { collaboratorId: null }
+      where: { collaboratorId: id },
+      data: { collaboratorId: null },
     });
 
+    // Hapus collaborator
     await prisma.collaborator.delete({
-      where: { id: params.id },
+      where: { id },
     });
 
     return NextResponse.json({ success: true });
   } catch (error: any) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(
+      { error: error.message },
+      { status: 500 }
+    );
   }
 }

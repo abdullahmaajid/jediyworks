@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter,useParams } from "next/navigation";
 import { AdminForm, FormField, FormInput, FormTextarea } from "../../../../../components/admin/AdminForm";
 
 export default function EditProjectPage({ params }: { params: { id: string } }) {
@@ -9,6 +9,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   const [loading, setLoading] = useState(false);
   const [fetching, setFetching] = useState(true);
   const [error, setError] = useState("");
+  const { id } = useParams();
 
   const [formData, setFormData] = useState({
     title: "",
@@ -30,16 +31,23 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
     featured: false,
   });
 
-  useEffect(() => {
-    fetchProject();
-  }, [params.id]);
+useEffect(() => {
+    if (id) {
+      fetchProject();
+    }
+  }, [id]);
 
   const fetchProject = async () => {
     try {
-      const res = await fetch(`/api/admin/projects/${params.id}`);
-      if (!res.ok) throw new Error("Failed to fetch project");
+      const res = await fetch(`/api/admin/projects/${id}`);
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Failed to fetch project");
+      }
+
       const data = await res.json();
-      
+
       setFormData({
         title: data.title || "",
         slug: data.slug || "",
@@ -57,7 +65,7 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
         execution: data.execution || "",
         impact: data.impact || "",
         status: data.status || "DRAFT",
-        featured: data.featured || false,
+        featured: Boolean(data.featured),
       });
     } catch (err: any) {
       setError(err.message);
@@ -66,30 +74,38 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    
-    setFormData(prev => ({
+
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === "checkbox" ? checked : value,
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
     setLoading(true);
     setError("");
 
     try {
-      const res = await fetch(`/api/admin/projects/${params.id}`, {
+      const res = await fetch(`/api/admin/projects/${id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(formData),
       });
 
+      const data = await res.json();
+
       if (!res.ok) {
-        const data = await res.json();
         throw new Error(data.error || "Failed to update project");
       }
 
@@ -103,8 +119,13 @@ export default function EditProjectPage({ params }: { params: { id: string } }) 
   };
 
   if (fetching) {
-    return <div className="p-8 text-[var(--near-black)]">Loading project data...</div>;
+    return (
+      <div className="p-8 text-[var(--near-black)]">
+        Loading project data...
+      </div>
+    );
   }
+
 
   return (
     <div className="p-8">
